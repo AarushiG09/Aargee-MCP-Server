@@ -1,0 +1,19 @@
+# Google credentials & access tokens (MUST NOT be committed)
+credentials.json
+token.json
+
+# Python bytecode & cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
