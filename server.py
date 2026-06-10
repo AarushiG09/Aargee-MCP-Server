@@ -11,6 +11,14 @@ app = FastAPI(
     version="1.0.0"
 )
 
+@app.get("/")
+def read_root():
+    return {
+        "status": "online",
+        "message": "Google Docs & Gmail MCP Server is running successfully.",
+        "documentation": "/docs"
+    }
+
 # Pydantic schemas for endpoint validation
 class AppendDocRequest(BaseModel):
     doc_id: str
