@@ -1,6 +1,6 @@
 import os
 import sys
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, Header
 from pydantic import BaseModel
 from docs_tool import append_to_doc
 from gmail_tool import create_email_draft
@@ -31,6 +31,14 @@ class CreateEmailDraftRequest(BaseModel):
 
 # Configurable approval bypass for headless/production deployments
 BYPASS_APPROVAL = os.getenv("BYPASS_APPROVAL", "false").lower() == "true"
+MCP_API_KEY = os.getenv("MCP_API_KEY")
+
+def validate_api_key(key_received: str):
+    if MCP_API_KEY and key_received != MCP_API_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or missing API key."
+        )
 
 def ask_approval(action_name: str, payload: dict) -> bool:
     """
@@ -65,7 +73,8 @@ def ask_approval(action_name: str, payload: dict) -> bool:
         return False
 
 @app.post("/append_to_doc", status_code=status.HTTP_200_OK)
-def handle_append_to_doc(request: AppendDocRequest):
+def handle_append_to_doc(request: AppendDocRequest, x_api_key: str = Header(None)):
+    validate_api_key(x_api_key)
     payload = {
         "doc_id": request.doc_id,
         "content": request.content
@@ -88,7 +97,8 @@ def handle_append_to_doc(request: AppendDocRequest):
         )
 
 @app.post("/create_email_draft", status_code=status.HTTP_201_CREATED)
-def handle_create_email_draft(request: CreateEmailDraftRequest):
+def handle_create_email_draft(request: CreateEmailDraftRequest, x_api_key: str = Header(None)):
+    validate_api_key(x_api_key)
     payload = {
         "to": request.to,
         "subject": request.subject,
